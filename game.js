@@ -13,6 +13,81 @@ const gameOverOverlay = document.getElementById('game-over-overlay');
 const pauseOverlay = document.getElementById('pause-overlay');
 const finalScoreElement = document.getElementById('final-score');
 
+// Sound Engine using Web Audio API
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playSound(type) {
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    const now = audioCtx.currentTime;
+
+    switch (type) {
+        case 'move':
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(200, now);
+            oscillator.frequency.exponentialRampToValueAtTime(100, now + 0.05);
+            gainNode.gain.setValueAtTime(0.1, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+            oscillator.start(now);
+            oscillator.stop(now + 0.05);
+            break;
+        case 'rotate':
+            oscillator.type = 'triangle';
+            oscillator.frequency.setValueAtTime(300, now);
+            oscillator.frequency.exponentialRampToValueAtTime(450, now + 0.05);
+            gainNode.gain.setValueAtTime(0.1, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+            oscillator.start(now);
+            oscillator.stop(now + 0.05);
+            break;
+        case 'land':
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(150, now);
+            oscillator.frequency.exponentialRampToValueAtTime(50, now + 0.1);
+            gainNode.gain.setValueAtTime(0.2, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            oscillator.start(now);
+            oscillator.stop(now + 0.1);
+            break;
+        case 'clear':
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(400, now);
+            oscillator.frequency.exponentialRampToValueAtTime(800, now + 0.2);
+            gainNode.gain.setValueAtTime(0.2, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+            oscillator.start(now);
+            oscillator.stop(now + 0.2);
+            break;
+        case 'gameover':
+            oscillator.type = 'sawtooth';
+            oscillator.frequency.setValueAtTime(300, now);
+            oscillator.frequency.exponentialRampToValueAtTime(50, now + 0.5);
+            gainNode.gain.setValueAtTime(0.2, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+            oscillator.start(now);
+            oscillator.stop(now + 0.5);
+            break;
+        case 'start':
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(523.25, now); // C5
+            oscillator.frequency.setValueAtTime(659.25, now + 0.1); // E5
+            oscillator.frequency.setValueAtTime(783.99, now + 0.2); // G5
+            gainNode.gain.setValueAtTime(0.1, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            oscillator.start(now);
+            oscillator.stop(now + 0.3);
+            break;
+    }
+}
+
 // Scale for canvas
 context.scale(30, 30);
 nextContext.scale(30, 30);
@@ -248,6 +323,8 @@ function arenaSweep() {
             rowCount *= 2;
             player.lines++;
 
+            playSound('clear');
+
             if (player.lines % 10 === 0) {
                 player.level++;
                 dropInterval = Math.max(100, dropInterval * 0.8);
@@ -276,6 +353,7 @@ function playerDrop() {
     if (collide(arena, player)) {
         player.pos.y--;
         merge(arena, player);
+        playSound('land');
         playerReset();
         arenaSweep();
         updateScore();
@@ -296,6 +374,7 @@ function playerHardDrop() {
 
     // Final score bonus based on distance dropped might be better, 
     // but sticking to your +2 per cell for now.
+    playSound('land');
     merge(arena, player);
     playerReset();
     arenaSweep();
@@ -306,6 +385,8 @@ function playerMove(offset) {
     player.pos.x += offset;
     if (collide(arena, player)) {
         player.pos.x -= offset;
+    } else {
+        playSound('move');
     }
 }
 
@@ -348,6 +429,7 @@ function playerRotate(dir) {
             return;
         }
     }
+    playSound('rotate');
 }
 
 function updateScore() {
@@ -379,6 +461,7 @@ function update(time = 0) {
 
 function gameOver() {
     gameStarted = false;
+    playSound('gameover');
     gameOverOverlay.classList.remove('hidden');
     finalScoreElement.innerText = `최종 점수: ${player.score}`;
 }
@@ -405,6 +488,7 @@ function startGame() {
     playerReset();
     gameStarted = true;
     paused = false;
+    playSound('start');
     startOverlay.classList.add('hidden');
     gameOverOverlay.classList.add('hidden');
     lastTime = performance.now();
