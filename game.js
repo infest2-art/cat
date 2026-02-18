@@ -162,21 +162,55 @@ function drawMatrix(matrix, offset, ctx = context) {
     matrix.forEach((row, y) => {
         row.forEach((value, x) => {
             if (value !== 0) {
-                // Main Block
-                ctx.fillStyle = colors[value];
-                ctx.fillRect(x + offset.x, y + offset.y, 1, 1);
+                const drawX = x + offset.x;
+                const drawY = y + offset.y;
+                const baseColor = colors[value];
 
-                // Block highlight & shadow for 3D effect
+                // 1. Draw main block with gradient for depth
+                const gradient = ctx.createLinearGradient(drawX, drawY, drawX + 1, drawY + 1);
+                gradient.addColorStop(0, adjustColor(baseColor, 40));  // Highlight
+                gradient.addColorStop(0.5, baseColor);                // Base
+                gradient.addColorStop(1, adjustColor(baseColor, -40)); // Shadow
+
+                ctx.fillStyle = gradient;
+                ctx.fillRect(drawX, drawY, 1, 1);
+
+                // 2. Add Bevel/Border effect
                 ctx.lineWidth = 0.05;
-                ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-                ctx.strokeRect(x + offset.x, y + offset.y, 1, 1);
 
-                // Add a small inner square for detail
-                ctx.fillStyle = 'rgba(255,255,255,0.2)';
-                ctx.fillRect(x + offset.x + 0.1, y + offset.y + 0.1, 0.8, 0.1);
+                // Light inner border (top & left)
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.beginPath();
+                ctx.moveTo(drawX + 1, drawY);
+                ctx.lineTo(drawX, drawY);
+                ctx.lineTo(drawX, drawY + 1);
+                ctx.stroke();
+
+                // Dark inner border (bottom & right)
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.beginPath();
+                ctx.moveTo(drawX + 1, drawY);
+                ctx.lineTo(drawX + 1, drawY + 1);
+                ctx.lineTo(drawX, drawY + 1);
+                ctx.stroke();
+
+                // 3. Add a small 'shining' spot on the top-left
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.fillRect(drawX + 0.15, drawY + 0.15, 0.25, 0.25);
+
+                // 4. Outer stroke for definition
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.lineWidth = 0.02;
+                ctx.strokeRect(drawX, drawY, 1, 1);
             }
         });
     });
+}
+
+// Helper function to lighten/darken colors for depth
+function adjustColor(color, amount) {
+    return '#' + color.replace(/^#/, '').replace(/../g, color =>
+        ('0' + Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).slice(-2));
 }
 
 function draw() {
