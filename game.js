@@ -284,11 +284,18 @@ function playerDrop() {
 }
 
 function playerHardDrop() {
+    if (!gameStarted || paused) return;
+
+    // Initial safety check
+    if (collide(arena, player)) return;
+
     while (!collide(arena, player)) {
         player.pos.y++;
-        player.score += 2; // Bonus for hard drop
     }
     player.pos.y--;
+
+    // Final score bonus based on distance dropped might be better, 
+    // but sticking to your +2 per cell for now.
     merge(arena, player);
     playerReset();
     arenaSweep();
@@ -425,6 +432,7 @@ document.addEventListener('keydown', event => {
             playerRotate(1);
             break;
         case ' ':
+            event.preventDefault(); // Prevent page scrolling
             playerHardDrop();
             break;
         case 'p':
