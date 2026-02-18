@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Tetris - 프리미엄 테트리스 게임</title>
+    <meta name="description" content="현대적인 디자인과 매끄러운 애니메이션을 갖춘 프리미엄 네온 테트리스 게임입니다.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="background-animation"></div>
+
+    <div class="game-container">
+        <header>
+            <h1>NEON <span class="highlight">TETRIS</span></h1>
+        </header>
+
+        <main>
+            <div class="game-board-wrapper">
+                <canvas id="tetris" width="300" height="600"></canvas>
+                <div id="pause-overlay" class="overlay hidden">
+                    <h2>일시정지</h2>
+                    <p>'P'를 눌러 다시 시작</p>
+                </div>
+                <div id="game-over-overlay" class="overlay hidden">
+                    <h2>게임 종료</h2>
+                    <p id="final-score">최종 점수: 0</p>
+                    <button id="restart-btn">다시 도전</button>
+                </div>
+                <div id="start-overlay" class="overlay">
+                    <h2>준비되셨나요?</h2>
+                    <button id="start-btn">게임 시작</button>
+                    <div class="controls-hint">
+                        <p>← → : 이동</p>
+                        <p>↑ : 회전</p>
+                        <p>↓ : 천천히 내리기</p>
+                        <p>Space : 바로 내리기</p>
+                        <p>P : 일시정지</p>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="side-panel">
+                <div class="stat-box">
+                    <h3>다음 블록</h3>
+                    <div class="next-piece-container">
+                        <canvas id="next" width="120" height="120"></canvas>
+                    </div>
+                </div>
+
+                <div class="stat-box">
+                    <h3>점수</h3>
+                    <div id="score" class="value">0</div>
+                </div>
+
+                <div class="stat-box">
+                    <h3>레벨</h3>
+                    <div id="level" class="value">1</div>
+                </div>
+
+                <div class="stat-box">
+                    <h3>줄 제거</h3>
+                    <div id="lines" class="value">0</div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>
